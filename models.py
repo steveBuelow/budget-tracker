@@ -1,3 +1,10 @@
+"""
+models.py — Database model functions.
+All SQL uses parameterised queries (%s placeholders) — psycopg2 handles
+escaping, so no manual quoting is ever needed. This is the correct defence
+against SQL injection.
+"""
+
 from decimal import Decimal
 
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -6,7 +13,7 @@ from db import get_db
 
 
 def _jsonify_row(row: dict) -> dict:
-    """Convert psycopg2/Decimal/datetime values into JSON-friendly primitives."""
+    """Convert Decimal / datetime values returned by psycopg2 into JSON-safe types."""
     out = dict(row)
     for k, v in list(out.items()):
         if isinstance(v, Decimal):
@@ -16,8 +23,7 @@ def _jsonify_row(row: dict) -> dict:
     return out
 
 
-# ── USERS ──────────────────────────────────────────────────────────────────────
-
+# ── USERS ─────────────────────────────────────────────────────────────────────
 
 def create_user(username, password):
     hashed_pw = generate_password_hash(password)
@@ -64,8 +70,7 @@ def get_user_by_id(user_id):
         conn.close()
 
 
-# ── EXPENSES ───────────────────────────────────────────────────────────────────
-
+# ── EXPENSES ──────────────────────────────────────────────────────────────────
 
 def get_expenses(user_id):
     conn = get_db()
@@ -83,7 +88,6 @@ def get_expenses(user_id):
             rows = cur.fetchall()
     finally:
         conn.close()
-
     return [_jsonify_row(r) for r in rows]
 
 
@@ -152,8 +156,7 @@ def update_expense(expense_id, user_id, expense_name, amount, category, notes):
         conn.close()
 
 
-# ── NET WORTH ──────────────────────────────────────────────────────────────────
-
+# ── NET WORTH ─────────────────────────────────────────────────────────────────
 
 def get_net_worth_history(user_id):
     conn = get_db()
@@ -210,4 +213,3 @@ def delete_net_worth_entry(user_id, month):
         raise
     finally:
         conn.close()
-
