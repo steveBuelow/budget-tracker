@@ -885,15 +885,10 @@ const fmtK = (n) => {
   return n < 0 ? '-' + s : s;
 };
 const monthLabel = (dateString) => {
-  if (!dateString) return '—'; // Handle null/empty gracefully
-  
-  // Grab the first 10 chars (YYYY-MM-DD) and replace hyphens with slashes
-  const cleanStr = dateString.toString().substring(0, 10).replace(/-/g, '/');
-  const d = new Date(cleanStr);
-  
-  // Check if the resulting date is valid before trying to format it
-  if (isNaN(d)) return 'Invalid Date';
-  
+  if (!dateString) return '—';
+  const ym = dateString.toString().substring(0, 7); // Always grab YYYY-MM
+  const d = new Date(ym.replace(/-/g, '/') + '/01'); // Append day so JS can parse it
+  if (isNaN(d)) return '—';
   return d.toLocaleString('en-US', { month: 'short', year: '2-digit' });
 };
 const toast = (msg) => {
